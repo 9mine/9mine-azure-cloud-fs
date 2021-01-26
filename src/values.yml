@@ -41,11 +41,11 @@ profile: |
     echo $NINEP_PUBLIC_HOST > /dev/sysname 
     test -d /mnt/registry || mkdir -p /mnt/registry
     mount -A tcp!registry!registry /mnt/registry
-    AWS_DIR = /tmp/aws/cmd
-    test -d $AWS_DIR || mkdir -p $AWS_DIR
+    AZURE_DIR = /tmp/azure/cmd
+    test -d $AZURE_DIR || mkdir -p $AZURE_DIR
     load mpexpr
     fs_port = ${expr $NINEP_PUBLIC_PORT 1 +}
-    file2chan $AWS_DIR^/aws {} {
+    file2chan $AZURE_DIR^/azure {} {
         load mpexpr
         var=${expr 10 rand}
         echo new id is $var
@@ -57,6 +57,6 @@ profile: |
         fs_port=${expr $fs_port 1 +}
     }
         
-    grid/reglisten -A -r description ${quote $NINEP_DESCRIPTION} 'tcp!*!'^$port { export $AWS_DIR & }
+    grid/reglisten -A -r description ${quote $NINEP_DESCRIPTION} 'tcp!*!'^$port { export $AZURE_DIR & }
     test -n $status && os pkill -9 emu-g
     echo --- end of profile loading ---
