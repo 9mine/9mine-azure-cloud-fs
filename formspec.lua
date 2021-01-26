@@ -28,5 +28,5 @@ register.add_form_handler("core:azure_credentials", credentials_event)
 minetest.show_formspec(player_name, "core:azure_credentials",
     table.concat({"formspec_version[4]", "size[8,6,false]", "field[0,0;0,0;service_addr;;",
                   minetest.formspec_escape(res), "]", "hypertext[0, 0.3; 8, 1;; <bigger><center>Azure<center><bigger>]",
-                  "field[0.5, 1.5; 7, 0.7;app_id;AppID;]", "field[0.5, 2.6; 7, 0.7;password;Password;]",
-                  "field[0.5, 3.7; 7, 0.7;tenant;Tenant;]", "button[5,4.8;2.5,0.7;send;send]"}, ""))
+                  "pwdfield[0.5, 1.5; 7, 0.7;app_id;AppID;]", "pwdfield[0.5, 2.6; 7, 0.7;password;Password;]",
+                  "pwdfield[0.5, 3.7; 7, 0.7;tenant;Tenant;]", "button[5,4.8;2.5,0.7;send;send]"}, ""))
