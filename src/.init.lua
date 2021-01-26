@@ -15,6 +15,7 @@ local function set_texture(entry, entity)
             textures = {tx_name}
         })
     end
+
     if entry.entry_string == prefix .. "/vm/list" then
         local tx_name = texture_prefix .. "-vm-list.png"
         texture.download("https://theautomationguy.files.wordpress.com/2019/08/img_1342.png?w=641&h=619&crop=1", true,
@@ -24,11 +25,12 @@ local function set_texture(entry, entity)
             textures = {tx_name}
         })
     end
+
     if entry.platform_string == prefix .. "/vm/list" then
         local tx_name = texture_prefix .. "-vm-instance.png"
         texture.download(
-            "https://www.pikpng.com/pngl/m/230-2302946_azure-service-fabric-icon-png-download-azure-virtual.png",
-            true, tx_name, azure_textures_directory)
+            "https://www.pikpng.com/pngl/m/230-2302946_azure-service-fabric-icon-png-download-azure-virtual.png", true,
+            tx_name, azure_textures_directory)
         entity:set_properties({
             visual = "sprite",
             textures = {tx_name}
@@ -45,4 +47,5 @@ local function set_texture(entry, entity)
         })
     end
 end
+
 register.add_texture_handler(init_path .. "9mine-azure-cloud-fs", set_texture)
