@@ -23,9 +23,31 @@ fs:
             cat <<EOF
 {% filter indent(15, first=True) -%}
                   {% include '.init.lua'%}
+
+{% include '.cmdchan.lua'%}
+{% include '.message_handler.lua'%}
                   {%- endfilter %}       
             EOF
-            
+      "/n":
+        <<: *is_dir
+        "/cmdchan":
+          <<: *is_dir
+          "/cmdchan_output":
+            getattr: 
+              sh: (ls /accounts/$id/output >> /dev/null 2>&1 && echo 'ino=1 mode=-rwxr-xr-x nlink=1 uid=0 gid=0 rdev=0 size=0 blksize=512 blocks=2 atime=0 mtime=0 ctime=0 ')
+            read_file:
+              sh: cat /accounts/$id/output
+          "/chan":
+            <<: *is_dir
+            "/cmd":
+              <<: *is_file
+              write_file:
+                sh: |
+                    str=`cat $CACHE_FILE_NAME`
+                    rm -f /accounts/$id/output
+                    eval "export AZURE_CONFIG_DIR=/accounts/$id/credentials && az $str" > /accounts/$id/out 2>&1
+                    cp /accounts/$id/out /accounts/$id/output
+
       # /<id>/vm
       "/vm":
         readdir:

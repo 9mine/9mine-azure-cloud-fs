@@ -99,9 +99,85 @@ fs: |
                    end
 
                    register.add_texture_handler(init_path .. "9mine-azure-cloud-fs", set_texture)
+
+
+                   class "azure_cmdchan"("cmdchan")
+
+                   function azure_cmdchan:azure_cmdchan(connection, cmdchan_path)
+                       cmdchan:cmdchan(connection, cmdchan_path)
+                   end
+
+                   function azure_cmdchan:write(command)
+                       local conn = self.connection.conn
+                       local f = conn:newfid()
+                       print("Write " .. command .. " to " .. self.cmdchan_path)
+                       conn:walk(conn.rootfid, f, self.cmdchan_path)
+                       conn:open(f, 1)
+                       local buf = data.new(command)
+                       conn:write(f, 0, buf)
+                       conn:clunk(f)
+                   end
+
+                   function azure_cmdchan:execute(command, location)
+                       local tmp_file = "/n/cmdchan/cmdchan_output"
+                       pcall(azure_cmdchan.write, self, command, location)
+                       return select(2, pcall(azure_cmdchan.read, self, tmp_file))
+                   end
+                   platform.cmdchan = azure_cmdchan(platform.connection, core_conf:get("cmdchan_path"))
+
+                   local function azure_message_handler(player_name, message)
+                       if message:match("^az ") then
+                           local player = minetest.get_player_by_name(player_name)
+                           local player_graph = graphs:get_player_graph(player_name)
+                           local platform = player_graph:get_platform(common.get_platform_string(player))
+                           if not platform then
+                               return false
+                           end
+                           local cmdchan = platform:get_cmdchan()
+                           if not cmdchan then
+                               return
+                           end
+                           message = message:gsub("^az ", "")
+
+                           cmdchan:write(message)
+                           minetest.after(2, function()
+                               local result, response = pcall(cmdchan.read, cmdchan, "/n/cmdchan/cmdchan_output")
+                               cmdchan.show_response(response, player_name)
+                               if not result then
+                                   minetest.after(3, function()
+                                       result, response = pcall(cmdchan.read, cmdchan, "/n/cmdchan/cmdchan_output")
+                                       cmdchan.show_response(response, player_name)
+                                   end)
+                                   return
+                               end
+                           end)
+                           return true
+                       end
+                   end
+
+                   register.add_message_handler(init_path .. "azure_message_handler", azure_message_handler)
            
                 EOF
-                
+          "/n":
+            <<: *is_dir
+            "/cmdchan":
+              <<: *is_dir
+              "/cmdchan_output":
+                getattr: 
+                  sh: (ls /accounts/$id/output >> /dev/null 2>&1 && echo 'ino=1 mode=-rwxr-xr-x nlink=1 uid=0 gid=0 rdev=0 size=0 blksize=512 blocks=2 atime=0 mtime=0 ctime=0 ')
+                read_file:
+                  sh: cat /accounts/$id/output
+              "/chan":
+                <<: *is_dir
+                "/cmd":
+                  <<: *is_file
+                  write_file:
+                    sh: |
+                        str=`cat $CACHE_FILE_NAME`
+                        rm -f /accounts/$id/output
+                        eval "export AZURE_CONFIG_DIR=/accounts/$id/credentials && az $str" > /accounts/$id/out 2>&1
+                        cp /accounts/$id/out /accounts/$id/output
+
           # /<id>/vm
           "/vm":
             readdir:

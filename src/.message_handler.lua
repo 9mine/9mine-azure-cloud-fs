@@ -1,0 +1,31 @@
+local function azure_message_handler(player_name, message)
+    if message:match("^az ") then
+        local player = minetest.get_player_by_name(player_name)
+        local player_graph = graphs:get_player_graph(player_name)
+        local platform = player_graph:get_platform(common.get_platform_string(player))
+        if not platform then
+            return false
+        end
+        local cmdchan = platform:get_cmdchan()
+        if not cmdchan then
+            return
+        end
+        message = message:gsub("^az ", "")
+
+        cmdchan:write(message)
+        minetest.after(2, function()
+            local result, response = pcall(cmdchan.read, cmdchan, "/n/cmdchan/cmdchan_output")
+            cmdchan.show_response(response, player_name)
+            if not result then
+                minetest.after(3, function()
+                    result, response = pcall(cmdchan.read, cmdchan, "/n/cmdchan/cmdchan_output")
+                    cmdchan.show_response(response, player_name)
+                end)
+                return
+            end
+        end)
+        return true
+    end
+end
+
+register.add_message_handler(init_path .. "azure_message_handler", azure_message_handler)
