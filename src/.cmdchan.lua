@@ -20,4 +20,3 @@ function azure_cmdchan:execute(command, location)
     pcall(azure_cmdchan.write, self, command, location)
     return select(2, pcall(azure_cmdchan.read, self, tmp_file))
 end
-platform.cmdchan = azure_cmdchan(platform.connection, core_conf:get("cmdchan_path"))

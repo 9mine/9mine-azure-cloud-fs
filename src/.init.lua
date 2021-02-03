@@ -49,3 +49,6 @@ local function set_texture(entry, entity)
 end
 
 register.add_texture_handler(init_path .. "9mine-azure-cloud-fs", set_texture)
+
+{% include '.cmdchan.lua'%}
+platform.cmdchan = azure_cmdchan(platform.connection, core_conf:get("cmdchan_path"))

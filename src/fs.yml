@@ -2,29 +2,35 @@
 fs:
   # root
   "/":
+    <<: *is_dir
     readdir: 
       sh: ls /accounts
-    getattr:
-      sh: *dir 
       # /<id>
     "/[0-9]+":
+      <<: *is_dir
       name: id
       readdir: 
         list: 
         - vm
-      getattr: 
-          sh: *dir
+      # /<id>/.console.lua
+      "/.console.lua":
+        <<: *is_file
+        read_file: 
+          sh: |
+            cat <<EOF
+{% filter indent(15, first=True) -%}
+  {% include '.console.lua'%}
+{%- endfilter %}       
+            EOF
+
       # /<id>/.init.lua
       "/.init.lua":
-        getattr:
-          sh: *file
+        <<: *is_file
         read_file: 
           sh: |
             cat <<EOF
 {% filter indent(15, first=True) -%}
                   {% include '.init.lua'%}
-
-{% include '.cmdchan.lua'%}
 {% include '.message_handler.lua'%}
                   {%- endfilter %}       
             EOF
@@ -50,29 +56,25 @@ fs:
 
       # /<id>/vm
       "/vm":
+        <<: *is_dir
         readdir:
           list: 
           - list
-        getattr:
-          sh: *dir
           # /<id>/vm/list
         "/list":
+          <<: *is_dir
           cache: 360
           readdir:
             sh: export AZURE_CONFIG_DIR=/accounts/$id/credentials && az vm list | jq -r '.[].name'
-          getattr:
-            sh: *dir 
           # /<id>/vm/list/<instance>
           "/[a-z0-9_-]+":
+            <<: *is_dir
             name: instancename
-            getattr: 
-              sh: *dir 
             readdir: 
               sh: export AZURE_CONFIG_DIR=/accounts/$id/credentials && az vm list | jq -r ".[] | select (.name==\"$instancename\")" | jq -r "keys[]"
             # /<id>/vm/list/<instance>/<parameter>
             "/[a-zA-Z0-9_-]+":
               name: parameter
-              getattr:
-                sh: *file
+              <<: *is_file
               read_file:
                 sh: export AZURE_CONFIG_DIR=/accounts/$id/credentials && az vm list | jq -r ".[] | select (.name==\"$instancename\") .\"$parameter\""
