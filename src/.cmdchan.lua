@@ -1,7 +1,8 @@
 class "azure_cmdchan"("cmdchan")
 
 function azure_cmdchan:azure_cmdchan(connection, cmdchan_path)
-    cmdchan:cmdchan(connection, cmdchan_path)
+    self.connection = connection
+    self.cmdchan_path = cmdchan_path
 end
 
 function azure_cmdchan:write(command)
